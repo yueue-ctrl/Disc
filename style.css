@@ -30,3 +30,16 @@ body, html {
 .bottom { bottom: 0; left: 50%; transform: translateX(-50%) rotate(90deg); }
 .left { left: 0; top: 50%; transform: translateY(-50%); }
 .right { right: 0; top: 50%; transform: translateY(-50%); }
+
+#animation-container {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 51.5%; /* Moved down */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 30vw; /* Made smaller */
+    color: #333;
+    z-index: 100;
+    pointer-events: none; /* Make it unclickable */
+    transform-origin: center;
+}
