@@ -1,7 +1,13 @@
+@font-face {
+    font-family: 'BrophyOpti';
+    src: url('BrophyOpti.otf') format('opentype');
+}
+
 body, html {
     height: 100%;
     margin: 0;
     overflow: hidden; /* Hide scrollbars */
+    font-family: 'BrophyOpti', sans-serif;
 }
 
 .link {
