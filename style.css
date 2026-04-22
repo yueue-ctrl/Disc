@@ -1,0 +1,26 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    overflow: hidden; /* Hide scrollbars */
+}
+
+.link {
+    display: block;
+    position: absolute;
+    text-decoration: none;
+    color: #333;
+    font-size: 25px; /* Make the line thinner */
+    font-weight: bold;
+}
+
+/* Corners */
+.top-left { top: 0; left: 23px; transform: rotate(45deg); transform-origin: top left; }
+.top-right { top: 20px; right: -30px; transform: rotate(135deg); transform-origin: top left; }
+.bottom-left { bottom: 0; left: 23px; transform: rotate(-45deg); transform-origin: bottom left; }
+.bottom-right { bottom: 22px; right: -27px; transform: rotate(-135deg); transform-origin: bottom left; }
+
+/* Edges */
+.top { top: 0; left: 50%; transform: translateX(-50%) rotate(90deg); }
+.bottom { bottom: 0; left: 50%; transform: translateX(-50%) rotate(90deg); }
+.left { left: 0; top: 50%; transform: translateY(-50%); }
+.right { right: 0; top: 50%; transform: translateY(-50%); }
