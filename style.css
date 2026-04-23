@@ -28,7 +28,7 @@ body, html {
 
 /* Edges */
 .top { top: -3px; left: 50%; transform: translateX(-50%) rotate(90deg); }
-.bottom { bottom: 18px; left: 50%; transform: translateX(-50%) rotate(90deg); }
+.bottom { bottom: 1px; left: 50%; transform: translateX(-50%) rotate(90deg); }
 .left { left: 0; top: calc(50% - 3px); transform: translateY(-50%); }
 .right { right: 0; top: calc(50% - 3px); transform: translateY(-50%); }
 
@@ -52,4 +52,25 @@ body, html {
     width: 100%;
     height: 100%;
     z-index: -1; /* Place it behind other content */
+}
+
+.left-text {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: pre-wrap; /* Preserve line breaks */
+    text-align: left;
+    color: #333;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+@keyframes flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+}
+
+.flashing {
+    animation: flash 0.5s 3; /* Flash 3 times */
 }

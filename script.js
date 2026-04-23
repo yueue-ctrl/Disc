@@ -1,28 +1,43 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const topLink = document.querySelector('.link.top');
+    const links = document.querySelectorAll('.link');
     const animationContainer = document.getElementById('animation-container');
 
-    if (topLink && animationContainer) {
-        topLink.addEventListener('click', (event) => {
+    links.forEach(link => {
+        link.addEventListener('click', (event) => {
             event.preventDefault(); // Prevent immediate navigation
 
-            // Show the animation container
-            animationContainer.style.display = 'block';
+            const linkId = link.getAttribute('data-link-id');
+            const targetText = document.querySelector(`.left-text span[data-link-id="${linkId}"]`);
 
+            // --- Start Animations ---
+
+            // 1. Flash the corresponding text
+            if (targetText) {
+                targetText.classList.add('flashing');
+            }
+
+            // 2. Play the rotating '—' animation
+            animationContainer.style.display = 'block';
             let angle = 0;
             const rotationInterval = setInterval(() => {
                 angle += 45;
                 animationContainer.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
-
                 if (angle >= 360) {
                     clearInterval(rotationInterval);
                 }
-            }, 100); // Rotate every 100ms
+            }, 100);
 
-            // Wait for the animation to roughly finish, then navigate
+            // --- Navigate after animations ---
             setTimeout(() => {
-                window.location.href = topLink.href;
-            }, 1500); // Navigate after 1.5 seconds
+                // Clean up animations
+                if (targetText) {
+                    targetText.classList.remove('flashing');
+                }
+                animationContainer.style.display = 'none';
+
+                // Go to the new page
+                window.location.href = link.href;
+            }, 1500); // Wait 1.5 seconds for animations to complete
         });
-    }
+    });
 });
