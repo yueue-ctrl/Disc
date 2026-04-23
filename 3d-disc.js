@@ -76,73 +76,67 @@ document.addEventListener('DOMContentLoaded', () => {
     function animate() {
         requestAnimationFrame(animate);
 
+        disc.rotation.x += 0.005;
+        disc.rotation.y += 0.005;
+
         renderer.render(scene, camera);
     }
 
     let isDragging = false;
-    let previousMousePosition = {
-        x: 0,
-        y: 0
-    };
-
-    // Mouse Events
-    renderer.domElement.addEventListener('mousedown', (e) => {
-        isDragging = true;
-    });
-
-    renderer.domElement.addEventListener('mouseup', (e) => {
-        isDragging = false;
-    });
-
-    renderer.domElement.addEventListener('mousemove', (e) => {
-        handleDrag(e.offsetX, e.offsetY);
-    });
-
-    // Touch Events
-    renderer.domElement.addEventListener('touchstart', (e) => {
-        isDragging = true;
-        previousMousePosition = {
-            x: e.touches[0].clientX,
-            y: e.touches[0].clientY
-        };
-    });
-
-    renderer.domElement.addEventListener('touchend', (e) => {
-        isDragging = false;
-    });
-
-    renderer.domElement.addEventListener('touchmove', (e) => {
-        e.preventDefault(); // Prevent scrolling while dragging
-        handleDrag(e.touches[0].clientX, e.touches[0].clientY);
-    }, { passive: false });
-
-    function handleDrag(currentX, currentY) {
-        const deltaMove = {
-            x: currentX - previousMousePosition.x,
-            y: currentY - previousMousePosition.y
-        };
-
-        if (isDragging) {
-            const deltaRotationQuaternion = new THREE.Quaternion()
-                .setFromEuler(new THREE.Euler(
-                    toRadians(deltaMove.y * 1),
-                    toRadians(deltaMove.x * 1),
-                    0,
-                    'XYZ'
-                ));
-            
-            disc.quaternion.multiplyQuaternions(deltaRotationQuaternion, disc.quaternion);
-        }
-        
-        previousMousePosition = {
-            x: currentX,
-            y: currentY
-        };
-    }
+    let previousPointerPosition = { x: 0, y: 0 };
 
     function toRadians(angle) {
         return angle * (Math.PI / 180);
     }
+
+    function handlePointerDown(x, y) {
+        isDragging = true;
+        previousPointerPosition = { x, y };
+    }
+
+    function handlePointerUp() {
+        isDragging = false;
+    }
+
+    function handlePointerMove(x, y) {
+        if (!isDragging) return;
+
+        const deltaMove = {
+            x: x - previousPointerPosition.x,
+            y: y - previousPointerPosition.y
+        };
+
+        // Apply rotation based on pointer movement
+        const deltaRotationX = toRadians(deltaMove.y * 0.5); // y-movement rotates around x-axis
+        const deltaRotationY = toRadians(deltaMove.x * 0.5); // x-movement rotates around y-axis
+
+        disc.rotation.x += deltaRotationX;
+        disc.rotation.y += deltaRotationY;
+        
+        previousPointerPosition = { x, y };
+    }
+
+    // Mouse Events
+    renderer.domElement.addEventListener('mousedown', (e) => handlePointerDown(e.clientX, e.clientY));
+    renderer.domElement.addEventListener('mouseup', handlePointerUp);
+    renderer.domElement.addEventListener('mouseleave', handlePointerUp);
+    renderer.domElement.addEventListener('mousemove', (e) => handlePointerMove(e.clientX, e.clientY));
+
+    // Touch Events
+    renderer.domElement.addEventListener('touchstart', (e) => {
+        // Prevent mouse events from firing
+        e.preventDefault();
+        handlePointerDown(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: false });
+    renderer.domElement.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        handlePointerUp();
+    }, { passive: false });
+    renderer.domElement.addEventListener('touchmove', (e) => {
+        // Prevent page scrolling
+        e.preventDefault();
+        handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: false });
 
     animate();
 });
