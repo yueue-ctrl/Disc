@@ -76,9 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function animate() {
         requestAnimationFrame(animate);
 
-        disc.rotation.x += 0.005;
-        disc.rotation.y += 0.005;
-
         renderer.render(scene, camera);
     }
 
@@ -88,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         y: 0
     };
 
+    // Mouse Events
     renderer.domElement.addEventListener('mousedown', (e) => {
         isDragging = true;
     });
@@ -97,9 +95,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     renderer.domElement.addEventListener('mousemove', (e) => {
+        handleDrag(e.offsetX, e.offsetY);
+    });
+
+    // Touch Events
+    renderer.domElement.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        previousMousePosition = {
+            x: e.touches[0].clientX,
+            y: e.touches[0].clientY
+        };
+    });
+
+    renderer.domElement.addEventListener('touchend', (e) => {
+        isDragging = false;
+    });
+
+    renderer.domElement.addEventListener('touchmove', (e) => {
+        e.preventDefault(); // Prevent scrolling while dragging
+        handleDrag(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: false });
+
+    function handleDrag(currentX, currentY) {
         const deltaMove = {
-            x: e.offsetX - previousMousePosition.x,
-            y: e.offsetY - previousMousePosition.y
+            x: currentX - previousMousePosition.x,
+            y: currentY - previousMousePosition.y
         };
 
         if (isDragging) {
@@ -115,10 +135,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         previousMousePosition = {
-            x: e.offsetX,
-            y: e.offsetY
+            x: currentX,
+            y: currentY
         };
-    });
+    }
 
     function toRadians(angle) {
         return angle * (Math.PI / 180);
