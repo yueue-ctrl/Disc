@@ -46,22 +46,24 @@ document.addEventListener('DOMContentLoaded', () => {
         new THREE.MeshPhongMaterial({ // Material for front and back faces
             map: coverTexture,
             transparent: true,
-            opacity: 0.7, // Make it more visible but still transparent
-            shininess: 150, // Increase shininess for better highlights
+            opacity: 0.85,
+            shininess: 10, // Lower shininess for a more frosted/matte look
+            specular: 0xffffff, // Add a strong white specular highlight
             side: THREE.DoubleSide
         }),
         new THREE.MeshPhongMaterial({ // Material for the edge
-            color: 0xffffff,
+            color: 0xaaaaaa,
             transparent: true,
-            opacity: 0.7, // Match the face opacity
-            shininess: 150
+            opacity: 0.85,
+            shininess: 10, // Lower shininess
+            specular: 0xffffff // Add a strong white specular highlight
         })
     ];
     const disc = new THREE.Mesh(geometry, materials);
     scene.add(disc);
 
     // Add some light
-    const light = new THREE.DirectionalLight(0xffffff, 1);
+    const light = new THREE.DirectionalLight(0xffffff, 1.5);
     light.position.set(5, 5, 5).normalize();
     scene.add(light);
 
@@ -72,18 +74,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     camera.position.z = 5;
 
+    // --- Interaction & Animation ---
+
+    let isDragging = false;
+    let previousPointerPosition = { x: 0, y: 0 };
+    let rotationVelocity = { x: 0, y: 0 };
+    const damping = 0.95; // Closer to 1 = less friction, longer spin
+
     // Animation loop
     function animate() {
         requestAnimationFrame(animate);
 
-        disc.rotation.x += 0.005;
-        disc.rotation.y += 0.005;
+        // Apply constant auto-rotation (slowed down to see inertia better)
+        if (!isDragging) {
+            disc.rotation.x += 0.001;
+            disc.rotation.y += 0.001;
+        }
+
+        // If not dragging, apply inertia and damping
+        if (!isDragging && (Math.abs(rotationVelocity.x) > 0.0001 || Math.abs(rotationVelocity.y) > 0.0001)) {
+            disc.rotation.x += rotationVelocity.x;
+            disc.rotation.y += rotationVelocity.y;
+
+            // Apply damping (friction)
+            rotationVelocity.x *= damping;
+            rotationVelocity.y *= damping;
+        } else if (!isDragging) {
+            // Stop tiny movements to prevent infinite spinning
+            rotationVelocity.x = 0;
+            rotationVelocity.y = 0;
+        }
 
         renderer.render(scene, camera);
     }
-
-    let isDragging = false;
-    let previousPointerPosition = { x: 0, y: 0 };
 
     function toRadians(angle) {
         return angle * (Math.PI / 180);
@@ -91,11 +114,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handlePointerDown(x, y) {
         isDragging = true;
+        // Stop any ongoing inertia
+        rotationVelocity = { x: 0, y: 0 };
         previousPointerPosition = { x, y };
     }
 
     function handlePointerUp() {
         isDragging = false;
+        // The `rotationVelocity` now holds the last movement's speed for the animate loop to use
     }
 
     function handlePointerMove(x, y) {
@@ -106,12 +132,17 @@ document.addEventListener('DOMContentLoaded', () => {
             y: y - previousPointerPosition.y
         };
 
-        // Apply rotation based on pointer movement
+        // Calculate the rotation for this frame
         const deltaRotationX = toRadians(deltaMove.y * 0.5); // y-movement rotates around x-axis
         const deltaRotationY = toRadians(deltaMove.x * 0.5); // x-movement rotates around y-axis
 
+        // Apply rotation directly for immediate feedback
         disc.rotation.x += deltaRotationX;
         disc.rotation.y += deltaRotationY;
+        
+        // Update velocity for the inertia effect when released
+        rotationVelocity.x = deltaRotationX;
+        rotationVelocity.y = deltaRotationY;
         
         previousPointerPosition = { x, y };
     }
@@ -124,7 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Touch Events
     renderer.domElement.addEventListener('touchstart', (e) => {
-        // Prevent mouse events from firing
         e.preventDefault();
         handlePointerDown(e.touches[0].clientX, e.touches[0].clientY);
     }, { passive: false });
@@ -133,10 +163,19 @@ document.addEventListener('DOMContentLoaded', () => {
         handlePointerUp();
     }, { passive: false });
     renderer.domElement.addEventListener('touchmove', (e) => {
-        // Prevent page scrolling
         e.preventDefault();
         handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
     }, { passive: false });
+
+    // Handle window resizing
+    window.addEventListener('resize', () => {
+        // Update camera aspect ratio
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        // Update renderer size
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
 
     animate();
 });
