@@ -66,22 +66,31 @@
 
                 for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
                     const promise = pdf.getPage(pageNum).then(function(page) {
-                        const unscaledViewport = page.getViewport({ scale: 1 });
-                        const scale = availableWidth / unscaledViewport.width;
-                        const viewport = page.getViewport({ scale: scale });
+                            const unscaledViewport = page.getViewport({ scale: 1 });
+                            
+                            // --- High-Resolution Rendering --- 
+                            const pixelRatio = window.devicePixelRatio || 1;
+                            const scale = (availableWidth / unscaledViewport.width) * pixelRatio;
+                            const viewport = page.getViewport({ scale: scale });
 
-                        const canvas = document.createElement('canvas');
-                        const context = canvas.getContext('2d');
-                        canvas.height = viewport.height;
-                        canvas.width = viewport.width;
-                        
-                        viewer.appendChild(canvas);
+                            const canvas = document.createElement('canvas');
+                            const context = canvas.getContext('2d');
+                            
+                            // Set canvas size to match the high-res viewport
+                            canvas.height = viewport.height;
+                            canvas.width = viewport.width;
 
-                        const renderContext = {
-                            canvasContext: context,
-                            viewport: viewport
-                        };
-                        return page.render(renderContext).promise;
+                            // Set canvas display size to be CSS-pixel-correct
+                            canvas.style.width = `${viewport.width / pixelRatio}px`;
+                            canvas.style.height = `${viewport.height / pixelRatio}px`;
+                            
+                            viewer.appendChild(canvas);
+
+                            const renderContext = {
+                                canvasContext: context,
+                                viewport: viewport
+                            };
+                            return page.render(renderContext).promise;
                     });
                     renderPromises.push(promise);
                 }

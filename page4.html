@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Page 4</title>
-    <link rel="stylesheet" href="style.css">
     <style>
         body, html {
             margin: 0;
@@ -13,11 +12,7 @@
             justify-content: center;
             align-items: center;
             background-color: #f0f0f0;
-        }
-        img {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
+            font-family: 'BrophyOpti', sans-serif;
         }
         .back-link {
             position: fixed;
@@ -31,10 +26,69 @@
             text-decoration: none;
             font-weight: bold;
         }
+        .image-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+        #flash-image {
+            animation: flash 1.5s ease-in-out;
+        }
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.1; }
+            50% { opacity: 1; }
+        }
+        #final-image {
+            display: none; /* Hidden by default */
+            width: 100%;
+            height: auto;
+            max-width: 100%; /* Override default img styles */
+        }
+        .blog-link {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            color: #333;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 8px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            display: none; /* Initially hidden */
+        }
     </style>
 </head>
 <body>
     <a href="index.html" class="back-link">back</a>
-    <img src="page/page4.png" alt="Page 4 Image">
+    <a href="https://medium.com/@zhouyue_32347/measured-celebration-bab3793aa2c2" target="_blank" class="blog-link">blog link</a>
+
+    <div class="image-container">
+        <img id="flash-image" src="page/page4.png" alt="Page 4 Initial Image">
+        <img id="final-image" src="page/page4pdf.png" alt="Page 4 Final Image">
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const flashImage = document.getElementById('flash-image');
+            const finalImage = document.getElementById('final-image');
+            const blogLink = document.querySelector('.blog-link');
+
+            // Wait for the flash animation to finish (1.5s)
+            setTimeout(() => {
+                flashImage.style.display = 'none';
+                finalImage.style.display = 'block';
+                blogLink.style.display = 'block'; // Show the blog link
+            }, 1500);
+        });
+    </script>
 </body>
 </html>

@@ -35,8 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 animationContainer.style.display = 'none';
 
-                // Go to the new page
-                window.location.href = link.href;
+                // Handle navigation: open in new tab if target="_blank"
+                if (link.target === '_blank') {
+                    window.open(link.href, '_blank');
+                } else {
+                    // Go to the new page
+                    window.location.href = link.href;
+                }
             }, 1500); // Wait 1.5 seconds for animations to complete
         });
     });

@@ -3,21 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Page 8</title>
-    <link rel="stylesheet" href="style.css">
     <style>
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            overflow: hidden; /* Start with hidden overflow */
             background-color: #f0f0f0;
-        }
-        img {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
+            font-family: 'BrophyOpti', sans-serif;
         }
         .back-link {
             position: fixed;
@@ -31,10 +24,103 @@
             text-decoration: none;
             font-weight: bold;
         }
+        #flash-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+        #flash-image {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            animation: flash 1.5s ease-in-out;
+        }
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.1; }
+            50% { opacity: 1; }
+        }
+        #pdf-viewer-container {
+            display: none; /* Hidden by default */
+            height: 100%;
+            width: 100%;
+            overflow-y: auto;
+            touch-action: auto;
+        }
+        #pdf-viewer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
     <a href="index.html" class="back-link">back</a>
-    <img src="page/page8.png" alt="Page 8 Image">
+
+    <div id="flash-container">
+        <img id="flash-image" src="page/page8.png" alt="Page 8 Image">
+    </div>
+
+    <div id="pdf-viewer-container">
+        <div id="pdf-viewer"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const flashContainer = document.getElementById('flash-container');
+            const pdfContainer = document.getElementById('pdf-viewer-container');
+
+            setTimeout(() => {
+                flashContainer.style.display = 'none';
+                pdfContainer.style.display = 'block';
+                document.body.style.overflow = 'auto';
+                renderPdf();
+            }, 1500);
+
+            const url = 'page/page8.pdf';
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+            const viewer = document.getElementById('pdf-viewer');
+
+            function renderPdf() {
+                const loadingTask = pdfjsLib.getDocument(url);
+                loadingTask.promise.then(function(pdf) {
+                    const availableWidth = viewer.clientWidth > 0 ? viewer.clientWidth - 40 : 800;
+                    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                        pdf.getPage(pageNum).then(function(page) {
+                            const unscaledViewport = page.getViewport({ scale: 1 });
+                            const pixelRatio = window.devicePixelRatio || 1;
+                            const scale = (availableWidth / unscaledViewport.width) * pixelRatio;
+                            const viewport = page.getViewport({ scale: scale });
+
+                            const canvas = document.createElement('canvas');
+                            const context = canvas.getContext('2d');
+                            canvas.height = viewport.height;
+                            canvas.width = viewport.width;
+                            canvas.style.width = `${viewport.width / pixelRatio}px`;
+                            canvas.style.height = `${viewport.height / pixelRatio}px`;
+                            
+                            viewer.appendChild(canvas);
+
+                            const renderContext = {
+                                canvasContext: context,
+                                viewport: viewport
+                            };
+                            page.render(renderContext);
+                        });
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
